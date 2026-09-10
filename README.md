@@ -47,6 +47,12 @@ Os scripts continuam clássicos (sem etapa de build), carregados em ordem explí
 
 Em **Ajustes**, é possível escolher fundo azul, rosa, preto ou branco, alterar o tamanho da fonte e ativar o modo daltônico de alto contraste. O botão **Emitir relatório** gera um **Resumo financeiro** para o mês selecionado (ou o atual) e abre a impressão nativa; selecione **Salvar como PDF** no navegador. O título não usa “extrato mensal”.
 
+## Uso em celular, importação e parcelas
+
+Em telas pequenas, a navegação vira um menu hamburguer com painel lateral, fechamento por toque fora, seleção de página ou tecla Esc. Cards, cabeçalho, gráficos, formulários e tabelas usam composição adaptativa sem ocultar funções. Os ícones são vetoriais e monocromáticos e acompanham a cor ativa do tema.
+
+Em **Importar dados**, escolha a conta ou cartão que receberá os lançamentos e envie um OFX, CSV, JSON ou planilha Excel (`.xlsx`). A tela apresenta uma conciliação antes de salvar. Em **Contas e Cartões**, o formulário de compras parceladas cria cada parcela no mês correspondente; as futuras ficam pendentes para acompanhamento. SheetJS é carregada somente para interpretar planilhas Excel.
+
 ## Executar e publicar
 
 Abra `index.html` em um navegador ou publique o conteúdo da raiz no GitHub Pages. Não há build, dependências ou backend. Chart.js, ícones e fonte são carregados por CDN; as funções essenciais de dados continuam locais.

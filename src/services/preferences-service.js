@@ -12,7 +12,7 @@
   function apply(prefs) {
     const [body, sidebar, card, input, primary, text, muted] = themes[prefs.palette] || themes.preto;
     const root = document.documentElement;
-    [['--bg-body',body],['--bg-sidebar',sidebar],['--bg-card',card],['--bg-input',input],['--primary',primary],['--primary-hover',primary],['--text',text],['--text-muted',muted]].forEach(([key, value]) => root.style.setProperty(key, value));
+    [['--bg-body',body],['--bg-sidebar',sidebar],['--bg-card',card],['--bg-input',input],['--primary',primary],['--primary-hover',primary],['--primary-light',`${primary}26`],['--text',text],['--text-muted',muted]].forEach(([key, value]) => root.style.setProperty(key, value));
     document.body.style.fontSize = `${Math.max(80, Math.min(130, prefs.fontScale))}%`;
     root.dataset.colorMode = prefs.colorMode;
   }

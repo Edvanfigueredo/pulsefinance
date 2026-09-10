@@ -94,6 +94,7 @@
     const legacySave = saveDB;
     saveDB = function () { legacySave(); storage.set(db).catch(() => {}); };
     try { const saved = await storage.get(); if (saved && typeof saved === 'object') { db = saved; validarIntegridadeDB(); renderApp(); } else { await storage.set(db); } } catch { /* localStorage remains a compatible fallback */ }
+    if (!db.userName) { db.authenticated = false; checkAuth(); }
     const originalRender = renderApp;
     renderApp = function () { originalRender(); renderInsights(); renderMonths(); };
     renderApp();
