@@ -49,6 +49,9 @@
 
   .view-section [style*="display:flex"] { flex-wrap: wrap; min-width: 0; }
   .view-section [style*="display:flex"] > * { min-width: 0; }
+  .view-section [style*="display:flex"] > button { flex: 1 1 auto; }
+  .card-header { flex-wrap: wrap; align-items: flex-start; gap: 10px; }
+  .card-header > input { flex: 1 1 100%; width: 100% !important; }
   form[style*="display:flex"] input, form[style*="display:flex"] select { flex: 1 1 130px !important; min-width: 0; }
   form[style*="display:flex"] button { flex: 1 1 auto; }
   #view-educacao .grid-2-equal .card { display: flex; flex-direction: column; }

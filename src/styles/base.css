@@ -160,7 +160,9 @@
         .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; }
         .grid-2 { display: grid; grid-template-columns: 2fr 1fr; gap: 22px; }
         .grid-2-equal { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
-        @media(max-width: 1024px) { .grid-2, .grid-2-equal { grid-template-columns: 1fr; } }
+        /* A barra lateral reduz a área útil; formulários em duas colunas passam a uma coluna antes de apertarem. */
+        @media(max-width: 1280px) { .grid-2 { grid-template-columns: 1fr; } }
+        @media(max-width: 1024px) { .grid-2-equal { grid-template-columns: 1fr; } }
 
         .card { 
             background-color: var(--bg-card); 
@@ -179,13 +181,25 @@
 
         input, select, button, textarea {
             background-color: var(--bg-input); border: 1px solid var(--border); color: var(--text);
-            padding: 10px 14px; border-radius: var(--radius-sm); font-size: 0.85rem; outline: none;
+            max-width: 100%; padding: 10px 14px; border-radius: var(--radius-sm); font-size: 0.85rem; outline: none;
             transition: all 0.2s;
         }
         input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
         button { cursor: pointer; font-weight: 600; border: none; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
         button:hover { opacity: 0.92; transform: translateY(-1px); }
         button:active { transform: translateY(0); }
+
+        /* Formulários compactos: os campos nunca podem transbordar um card estreito. */
+        .view-section form[style*="display:flex"] { flex-wrap: wrap; min-width: 0; }
+        .view-section form[style*="display:flex"] > input,
+        .view-section form[style*="display:flex"] > select { flex: 1 1 140px !important; min-width: 0; }
+        .view-section form[style*="display:flex"] > button { flex: 0 1 auto; }
+
+        /* Calculadoras educativas com leitura vertical em qualquer largura. */
+        #view-educacao .grid-2-equal .card { display: flex; flex-direction: column; }
+        #view-educacao .grid-2-equal label { display: flex; flex-direction: column; align-items: stretch; gap: 5px; margin-top: 10px; font-size: 0.85rem; }
+        #view-educacao .grid-2-equal label input { width: 100%; min-width: 0; }
+        #view-educacao .grid-2-equal button { align-self: flex-start; margin-top: 12px; }
         
         .btn-primary { background-color: var(--primary); color: #fff; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25); }
         .btn-green { background-color: var(--accent-green); color: #fff; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2); }
