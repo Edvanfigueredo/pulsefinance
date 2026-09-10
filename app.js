@@ -87,7 +87,9 @@
     document.getElementById('copy-ai-prompt').addEventListener('click', copyPrompt);
   }
   function applyStyles() {
-    const style = document.createElement('style'); style.textContent = `.pulse-list{display:grid;gap:10px}.pulse-month{background:var(--bg-input);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:14px;text-align:left;cursor:pointer}.pulse-month span{display:block;color:var(--text-muted);font-size:.8rem;margin-top:5px}.pulse-terms{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:16px}.pulse-insights{padding-left:20px;display:grid;gap:10px}.pulse-warning{border-left:4px solid var(--accent-amber);padding:12px;background:var(--primary-light);margin:16px 0}.pulse-actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.pulse-actions a{text-decoration:none}@media(max-width:700px){body{height:auto;overflow:auto}sidebar{width:70px}.nav-item{font-size:0;padding:12px;justify-content:center}.nav-item:first-letter{font-size:1.15rem}.brand-slogan{display:none}header{padding:0 12px}.view-section{padding:16px}header #user-display,header .btn-amber{display:none}table{display:block;overflow-x:auto}.pulse-actions>*{width:100%;text-align:center}}`; document.head.appendChild(style);
+    const style = document.createElement('style');
+    style.textContent = `.pulse-list{display:grid;gap:10px}.pulse-month{background:var(--bg-input);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:14px;text-align:left;cursor:pointer}.pulse-month span{display:block;color:var(--text-muted);font-size:.8rem;margin-top:5px}.pulse-terms{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:16px}.pulse-insights{padding-left:20px;display:grid;gap:10px}.pulse-warning{border-left:4px solid var(--accent-amber);padding:12px;background:var(--primary-light);margin:16px 0}.pulse-actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.pulse-actions a{text-decoration:none}`;
+    document.head.appendChild(style);
   }
   document.addEventListener('DOMContentLoaded', async () => {
     applyStyles(); addViews();
