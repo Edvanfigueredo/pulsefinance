@@ -53,6 +53,9 @@
                     <div class="nav-item" onclick="navigate('relatorios')"><i class="fa-solid fa-chart-line"></i> Relatórios</div>
                     <div class="nav-item" onclick="navigate('meses')"><i class="fa-solid fa-calendar-days"></i> Histórico mensal</div>
                     <div class="nav-item" onclick="navigate('educacao')"><i class="fa-solid fa-book-open"></i> Aprender</div>
+                    <button class="nav-item nav-action" type="button" onclick="navigate('financeiro'); clearTxForm();"><i class="fa-solid fa-plus"></i> Nova transação</button>
+                    <button class="nav-item nav-action" id="monthly-report-button" type="button"><i class="fa-solid fa-file-pdf"></i> Emitir relatório</button>
+                    <button class="nav-item nav-action nav-reset" type="button" onclick="resetData()"><i class="fa-solid fa-rotate-left"></i> Resetar dados</button>
                     <div class="nav-item" onclick="navigate('inteligencia')"><i class="fa-solid fa-sparkles"></i> Pulse IA</div>
                     <div class="nav-item" onclick="navigate('importacao')"><i class="fa-solid fa-file-arrow-up"></i> Importar dados</div>
                     <div class="nav-item" onclick="navigate('configuracoes')"><i class="fa-solid fa-sliders"></i> Ajustes</div>
@@ -71,13 +74,8 @@
                     <h4 id="page-title" style="font-weight:800; font-size:1.25rem;">Visão Geral</h4>
                 </div>
                 <div style="display:flex; align-items:center; gap:12px;">
-                    <button class="btn-primary btn-sm" onclick="navigate('financeiro'); clearTxForm();" style="padding:8px 16px;">
-                        <i class="fa-solid fa-plus"></i> Transação
-                    </button>
-                    <button class="btn-green btn-sm" id="monthly-report-button" type="button">Emitir relatório</button>
                     <button class="btn-theme" id="theme-toggle-btn" onclick="toggleTheme()" title="Alternar Tema Claro/Escuro"><i class="fa-solid fa-circle-half-stroke"></i> Tema</button>
                     <span id="user-display" class="badge" style="padding:6px 12px;">Participante</span>
-                    <button class="btn-amber btn-sm" onclick="resetData()">Resetar</button>
                 </div>
             </header>
 
