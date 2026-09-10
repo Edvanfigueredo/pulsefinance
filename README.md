@@ -17,6 +17,14 @@ Esta evolução preserva as funcionalidades existentes (transações, contas, ca
 - Fluxo manual e seguro para ChatGPT, sem API nem envio automático de dados;
 - Aviso de privacidade e melhoria de uso em telas pequenas.
 
+## Organização do código
+
+Os recursos novos estão separados por responsabilidade: `src/services` contém persistência e preferências, `src/features` contém regras de negócio como o relatório, `src/ui` contém componentes de interface e `src/styles` concentra os estilos complementares. O HTML legado foi preservado para evitar regressões graduais.
+
+## Acessibilidade e relatório
+
+Em **Ajustes**, é possível escolher fundo azul, rosa, preto ou branco, alterar o tamanho da fonte e ativar o modo daltônico de alto contraste. O botão **Emitir relatório** gera um **Resumo financeiro** para o mês selecionado (ou o atual) e abre a impressão nativa; selecione **Salvar como PDF** no navegador. O título não usa “extrato mensal”.
+
 ## Executar e publicar
 
 Abra `index.html` em um navegador ou publique o conteúdo da raiz no GitHub Pages. Não há build, dependências ou backend. Chart.js, ícones e fonte são carregados por CDN; as funções essenciais de dados continuam locais.
