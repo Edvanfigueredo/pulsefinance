@@ -1,8 +1,8 @@
         // Estado compartilhado, persistência legada, autenticação e navegação.
         const DEFAULT_STATE = {
             theme: 'dark',
-            authenticated: true,
-            userEmail: 'usuario@pulse.com.br',
+            authenticated: false,
+            userName: '',
             categorias: [
                 { id: 1, nome: 'Alimentação', tipo: 'despesa' },
                 { id: 2, nome: 'Transporte', tipo: 'despesa' },
@@ -70,7 +70,7 @@
                 db = {
                     theme: db.theme || 'dark',
                     authenticated: true,
-                    userEmail: db.userEmail || 'usuario@pulse.com.br',
+                    userName: db.userName || '',
                     categorias: [],
                     contas: [],
                     cartoes: [],
@@ -93,7 +93,7 @@
             document.documentElement.setAttribute('data-theme', db.theme || 'dark');
             const btn = document.getElementById('theme-toggle-btn');
             if(btn) {
-                btn.innerText = db.theme === 'dark' ? '🌙 Escuro' : '☀️ Claro';
+                btn.innerHTML = '<i class="fa-solid fa-circle-half-stroke"></i> Tema';
             }
         }
 
@@ -101,7 +101,7 @@
         function handleAuth(e) {
             e.preventDefault();
             db.authenticated = true;
-            db.userEmail = document.getElementById('auth-email').value;
+            db.userName = document.getElementById('auth-name').value.trim();
             saveDB();
             checkAuth();
         }
@@ -116,7 +116,7 @@
             const authScreen = document.getElementById('auth-screen');
             if(db.authenticated) {
                 authScreen.style.display = 'none';
-                document.getElementById('user-display').innerText = db.userEmail || 'usuario@pulse.com.br';
+                document.getElementById('user-display').innerText = db.userName || 'Participante';
             } else {
                 authScreen.style.display = 'flex';
             }

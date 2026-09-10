@@ -101,8 +101,8 @@
             const accSelect = document.getElementById('tx-conta');
             if (accSelect) {
                 accSelect.innerHTML = '';
-                db.contas.forEach(c => accSelect.innerHTML += `<option value="conta_${c.id}">🏦 ${c.nome}</option>`);
-                db.cartoes.forEach(c => accSelect.innerHTML += `<option value="cartao_${c.id}">💳 ${c.nome}</option>`);
+                db.contas.forEach(c => accSelect.innerHTML += `<option value="conta_${c.id}">${c.nome}</option>`);
+                db.cartoes.forEach(c => accSelect.innerHTML += `<option value="cartao_${c.id}">${c.nome}</option>`);
             }
 
             // Categorias
@@ -146,8 +146,8 @@
             if(importDestino) {
                 const valorAtual = importDestino.value;
                 importDestino.innerHTML = '<option value="">-- Escolha a Conta ou Cartão --</option>';
-                db.contas.forEach(c => importDestino.innerHTML += `<option value="conta_${c.id}">🏦 ${c.nome}</option>`);
-                db.cartoes.forEach(c => importDestino.innerHTML += `<option value="cartao_${c.id}">💳 ${c.nome}</option>`);
+                db.contas.forEach(c => importDestino.innerHTML += `<option value="conta_${c.id}">${c.nome} (conta)</option>`);
+                db.cartoes.forEach(c => importDestino.innerHTML += `<option value="cartao_${c.id}">${c.nome} (cartão)</option>`);
                 importDestino.value = valorAtual;
             }
 
@@ -195,10 +195,10 @@
                     const targetId = String(t.contaId || '');
                     if(targetId.startsWith('conta_')) {
                         const acc = db.contas.find(c => c.id === parseInt(targetId.replace('conta_', '')));
-                        if(acc) nomeDestino = `🏦 ${acc.nome}`;
+                        if(acc) nomeDestino = acc.nome;
                     } else if(targetId.startsWith('cartao_')) {
                         const card = db.cartoes.find(c => c.id === parseInt(targetId.replace('cartao_', '')));
-                        if(card) nomeDestino = `💳 ${card.nome}`;
+                        if(card) nomeDestino = card.nome;
                     }
 
                     tbTx.innerHTML += `
@@ -210,8 +210,8 @@
                             <td><span class="badge">${t.status}</span></td>
                             <td class="${t.tipo==='receita'?'val-plus':'val-minus'}">R$ ${(t.val||0).toFixed(2)}</td>
                             <td>
-                                <button class="btn-amber btn-sm" onclick="editTx(${t.id})">✏️</button>
-                                <button class="btn-red btn-sm" onclick="deleteTx(${t.id})">🗑️</button>
+                                <button class="btn-amber btn-sm" aria-label="Editar" onclick="editTx(${t.id})"><i class="fa-solid fa-pen"></i></button>
+                                <button class="btn-red btn-sm" aria-label="Excluir" onclick="deleteTx(${t.id})"><i class="fa-solid fa-trash"></i></button>
                             </td>
                         </tr>
                     `;
@@ -223,7 +223,7 @@
             if (tbAcc) {
                 tbAcc.innerHTML = '';
                 db.contas.forEach(c => {
-                    tbAcc.innerHTML += `<tr><td><strong>${c.nome}</strong></td><td class="val-plus">R$ ${(c.saldo||0).toFixed(2)}</td><td><button class="btn-red btn-sm" onclick="deleteConta(${c.id})">🗑️</button></td></tr>`;
+                    tbAcc.innerHTML += `<tr><td><strong>${c.nome}</strong></td><td class="val-plus">R$ ${(c.saldo||0).toFixed(2)}</td><td><button class="btn-red btn-sm" aria-label="Excluir conta" onclick="deleteConta(${c.id})"><i class="fa-solid fa-trash"></i></button></td></tr>`;
                 });
             }
 
@@ -232,7 +232,7 @@
             if (tbCard) {
                 tbCard.innerHTML = '';
                 db.cartoes.forEach(c => {
-                    tbCard.innerHTML += `<tr><td><strong>${c.nome}</strong></td><td>R$ ${(c.limite||0).toFixed(2)}</td><td><button class="btn-red btn-sm" onclick="deleteCartao(${c.id})">🗑️</button></td></tr>`;
+                    tbCard.innerHTML += `<tr><td><strong>${c.nome}</strong></td><td>R$ ${(c.limite||0).toFixed(2)}</td><td><button class="btn-red btn-sm" aria-label="Excluir cartão" onclick="deleteCartao(${c.id})"><i class="fa-solid fa-trash"></i></button></td></tr>`;
                 });
             }
 
@@ -241,7 +241,7 @@
             if(tbCat) {
                 tbCat.innerHTML = '';
                 db.categorias.forEach(c => {
-                    tbCat.innerHTML += `<tr><td><strong>${c.nome}</strong></td><td><span class="${c.tipo==='receita'?'val-plus':'val-minus'}">${(c.tipo||'despesa').toUpperCase()}</span></td><td><button class="btn-red btn-sm" onclick="deleteCategoria(${c.id})">🗑️</button></td></tr>`;
+                    tbCat.innerHTML += `<tr><td><strong>${c.nome}</strong></td><td><span class="${c.tipo==='receita'?'val-plus':'val-minus'}">${(c.tipo||'despesa').toUpperCase()}</span></td><td><button class="btn-red btn-sm" aria-label="Excluir categoria" onclick="deleteCategoria(${c.id})"><i class="fa-solid fa-trash"></i></button></td></tr>`;
                 });
             }
 
@@ -289,7 +289,7 @@
             if (tbAst) {
                 tbAst.innerHTML = '';
                 db.patrimonio.filter(p => p.tipo === 'ativo').forEach(p => {
-                    tbAst.innerHTML += `<tr><td>${p.nome}</td><td class="val-plus">R$ ${(p.val||0).toFixed(2)}</td><td><button class="btn-red btn-sm" onclick="deletePatrimonio(${p.id})">🗑️</button></td></tr>`;
+                    tbAst.innerHTML += `<tr><td>${p.nome}</td><td class="val-plus">R$ ${(p.val||0).toFixed(2)}</td><td><button class="btn-red btn-sm" aria-label="Excluir ativo" onclick="deletePatrimonio(${p.id})"><i class="fa-solid fa-trash"></i></button></td></tr>`;
                 });
             }
 
@@ -297,7 +297,7 @@
             if (tbPas) {
                 tbPas.innerHTML = '';
                 db.patrimonio.filter(p => p.tipo === 'passivo').forEach(p => {
-                    tbPas.innerHTML += `<tr><td>${p.nome}</td><td class="val-minus">R$ ${(p.val||0).toFixed(2)}</td><td><button class="btn-red btn-sm" onclick="deletePatrimonio(${p.id})">🗑️</button></td></tr>`;
+                    tbPas.innerHTML += `<tr><td>${p.nome}</td><td class="val-minus">R$ ${(p.val||0).toFixed(2)}</td><td><button class="btn-red btn-sm" aria-label="Excluir dívida" onclick="deletePatrimonio(${p.id})"><i class="fa-solid fa-trash"></i></button></td></tr>`;
                 });
             }
 
@@ -377,12 +377,12 @@
             if (alertBox) {
                 alertBox.innerHTML = '';
                 if(totalDespesas > totalReceitas && totalReceitas > 0) {
-                    alertBox.innerHTML += `<div class="badge badge-danger" style="display:block; padding:12px;">🚨 <strong>Atenção:</strong> Suas despesas ultrapassaram as receitas este mês.</div>`;
+                    alertBox.innerHTML += `<div class="badge badge-danger" style="display:block; padding:12px;"><i class="fa-solid fa-triangle-exclamation"></i> <strong>Atenção:</strong> Suas despesas ultrapassaram as receitas este mês.</div>`;
                 }
                 db.limites.forEach(l => {
                     const spent = db.transacoes.filter(t => t.tipo==='despesa' && (t.cat||'').toLowerCase()===(l.cat||'').toLowerCase()).reduce((a,b)=>a+(b.val||0),0);
                     if(spent > l.val) {
-                        alertBox.innerHTML += `<div class="badge badge-warning" style="display:block; padding:12px;">⚠️ Teto orçamentário estourado em <strong>${l.cat}</strong>.</div>`;
+                        alertBox.innerHTML += `<div class="badge badge-warning" style="display:block; padding:12px;"><i class="fa-solid fa-triangle-exclamation"></i> Teto orçamentário estourado em <strong>${l.cat}</strong>.</div>`;
                     }
                 });
                 if(!alertBox.innerHTML) alertBox.innerHTML = `<span style="color:var(--text-muted); font-size:0.85rem;">Sua saúde financeira está sob controle.</span>`;
