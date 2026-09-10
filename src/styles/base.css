@@ -120,13 +120,14 @@
         }
 
         /* App Layout */
-        #app-screen { display: flex; width: 100vw; height: 100vh; }
+        #app-screen { display: flex; width: 100vw; height: 100vh; min-height: 0; }
         sidebar {
             width: 260px; background-color: var(--bg-sidebar); border-right: 1px solid var(--border);
-            display: flex; flex-direction: column; justify-content: space-between; padding: 20px 0; flex-shrink: 0; overflow: hidden;
+            display: flex; flex-direction: column; justify-content: space-between; min-height: 0; padding: 20px 0; flex-shrink: 0; overflow: hidden;
             z-index: 20;
         }
         sidebar > div:first-child { display: flex; flex: 1; flex-direction: column; min-height: 0; }
+        sidebar > div:last-child { flex: 0 0 auto; }
         .brand-logo {
             padding: 0 20px 20px 20px; border-bottom: 1px solid var(--border); margin-bottom: 16px;
             display: flex; align-items: center; justify-content: center;
@@ -145,14 +146,14 @@
             box-shadow: 0 4px 14px rgba(124, 58, 237, 0.3); 
         }
 
-        main { flex: 1; display: flex; flex-direction: column; overflow-y: auto; background-color: var(--bg-body); }
+        main { flex: 1; min-width: 0; display: flex; flex-direction: column; overflow-y: auto; background-color: var(--bg-body); }
         header {
             height: 64px; background-color: var(--bg-sidebar); border-bottom: 1px solid var(--border);
             display: flex; justify-content: space-between; align-items: center; padding: 0 28px; flex-shrink: 0;
             position: sticky; top: 0; z-index: 10; backdrop-filter: blur(8px);
         }
 
-        .view-section { padding: 28px; display: none; flex-direction: column; gap: 24px; max-width: 1400px; margin: 0 auto; width: 100%; }
+        .view-section { padding: 28px; display: none; flex-direction: column; gap: 24px; max-width: 1400px; min-width: 0; margin: 0 auto; width: 100%; }
         .view-section.active { display: flex; }
 
         /* Componentes de Gráficos e Grid */
@@ -165,7 +166,7 @@
             background-color: var(--bg-card); 
             border: 1px solid var(--border); 
             border-radius: var(--radius); 
-            padding: 22px; 
+            min-width: 0; padding: 22px;
             box-shadow: var(--card-shadow); 
         }
         .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
