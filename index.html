@@ -1,0 +1,1658 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pulse - Gestão Financeira Pessoal</title>
+    <!-- Chart.js para gráficos interativos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome para Ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font Plus Jakarta Sans -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap">
+    <style>
+        :root {
+            --bg-body: #0b0f19;
+            --bg-sidebar: #111827;
+            --bg-card: #1f2937;
+            --bg-input: #374151;
+            --border: rgba(255, 255, 255, 0.08);
+            --text: #f9fafb;
+            --text-muted: #9ca3af;
+            --primary: #7c3aed;
+            --primary-hover: #6d28d9;
+            --primary-light: rgba(124, 58, 237, 0.15);
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --accent-amber: #f59e0b;
+            --accent-blue: #2563eb;
+            --accent-purple: #8b5cf6;
+            --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+            --radius: 16px;
+            --radius-sm: 10px;
+        }
+
+        [data-theme="light"] {
+            --bg-body: #f8fafc;
+            --bg-sidebar: #ffffff;
+            --bg-card: #ffffff;
+            --bg-input: #f1f5f9;
+            --border: #e2e8f0;
+            --text: #0f172a;
+            --text-muted: #64748b;
+            --primary: #7c3aed;
+            --primary-hover: #6d28d9;
+            --primary-light: rgba(124, 58, 237, 0.08);
+            --accent-green: #059669;
+            --accent-red: #dc2626;
+            --accent-amber: #d97706;
+            --accent-blue: #2563eb;
+            --accent-purple: #7c3aed;
+            --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+        }
+
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; 
+            transition: background-color 0.2s, border-color 0.2s, color 0.2s; 
+        }
+        
+        body { 
+            background-color: var(--bg-body); 
+            color: var(--text); 
+            display: flex; 
+            height: 100vh; 
+            overflow: hidden; 
+            font-size: 0.875rem; 
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ESTILIZAÇÃO DO LOGO METÁLICO E SLOGAN */
+        .brand-title-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-transform: uppercase;
+            user-select: none;
+        }
+
+        .brand-main-text {
+            font-weight: 900;
+            font-size: 1.8rem;
+            letter-spacing: 0.35em;
+            background: linear-gradient(180deg, #ffffff 0%, #cbd5e1 45%, #64748b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.7));
+            display: flex;
+            align-items: center;
+            line-height: 1;
+        }
+
+        .brand-slogan {
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.3em;
+            color: #2563eb;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 6px;
+            text-shadow: 0 0 10px rgba(37, 99, 235, 0.4);
+        }
+
+        .brand-slogan::before, .brand-slogan::after {
+            content: "";
+            display: inline-block;
+            width: 20px;
+            height: 2px;
+            background: linear-gradient(90deg, #475569, #cbd5e1);
+            border-radius: 1px;
+        }
+
+        /* Scrollbars customizadas */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+        /* Auth Layer */
+        #auth-screen {
+            position: fixed; inset: 0; background-color: var(--bg-body); z-index: 1000;
+            display: flex; justify-content: center; align-items: center;
+            background-image: radial-gradient(circle at 50% 0%, rgba(124, 58, 237, 0.15), transparent 70%);
+        }
+        .auth-card {
+            background-color: var(--bg-card); border: 1px solid var(--border); padding: 36px;
+            border-radius: var(--radius); width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 20px;
+            box-shadow: var(--card-shadow); text-align: center; backdrop-filter: blur(10px);
+        }
+
+        /* App Layout */
+        #app-screen { display: flex; width: 100vw; height: 100vh; }
+        sidebar {
+            width: 260px; background-color: var(--bg-sidebar); border-right: 1px solid var(--border);
+            display: flex; flex-direction: column; justify-content: space-between; padding: 20px 0; flex-shrink: 0;
+            z-index: 20;
+        }
+        .brand-logo {
+            padding: 0 20px 20px 20px; border-bottom: 1px solid var(--border); margin-bottom: 16px;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .nav-list { display: flex; flex-direction: column; gap: 6px; padding: 0 12px; overflow-y: auto; }
+        .nav-item {
+            padding: 11px 16px; border-radius: var(--radius-sm); color: var(--text-muted); cursor: pointer;
+            font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 12px; transition: all 0.2s ease;
+        }
+        .nav-item:hover { background-color: var(--primary-light); color: var(--text); }
+        .nav-item.active { 
+            background-color: var(--primary); 
+            color: #ffffff; 
+            font-weight: 700; 
+            box-shadow: 0 4px 14px rgba(124, 58, 237, 0.3); 
+        }
+
+        main { flex: 1; display: flex; flex-direction: column; overflow-y: auto; background-color: var(--bg-body); }
+        header {
+            height: 64px; background-color: var(--bg-sidebar); border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center; padding: 0 28px; flex-shrink: 0;
+            position: sticky; top: 0; z-index: 10; backdrop-filter: blur(8px);
+        }
+
+        .view-section { padding: 28px; display: none; flex-direction: column; gap: 24px; max-width: 1400px; margin: 0 auto; width: 100%; }
+        .view-section.active { display: flex; }
+
+        /* Componentes de Gráficos e Grid */
+        .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; }
+        .grid-2 { display: grid; grid-template-columns: 2fr 1fr; gap: 22px; }
+        .grid-2-equal { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+        @media(max-width: 1024px) { .grid-2, .grid-2-equal { grid-template-columns: 1fr; } }
+
+        .card { 
+            background-color: var(--bg-card); 
+            border: 1px solid var(--border); 
+            border-radius: var(--radius); 
+            padding: 22px; 
+            box-shadow: var(--card-shadow); 
+        }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+        
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+        th { color: var(--text-muted); font-weight: 700; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.7px; }
+        tr:last-child td { border-bottom: none; }
+        tbody tr:hover { background-color: var(--primary-light); }
+
+        input, select, button, textarea {
+            background-color: var(--bg-input); border: 1px solid var(--border); color: var(--text);
+            padding: 10px 14px; border-radius: var(--radius-sm); font-size: 0.85rem; outline: none;
+            transition: all 0.2s;
+        }
+        input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+        button { cursor: pointer; font-weight: 600; border: none; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+        button:hover { opacity: 0.92; transform: translateY(-1px); }
+        button:active { transform: translateY(0); }
+        
+        .btn-primary { background-color: var(--primary); color: #fff; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25); }
+        .btn-green { background-color: var(--accent-green); color: #fff; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2); }
+        .btn-red { background-color: var(--accent-red); color: #fff; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2); }
+        .btn-amber { background-color: var(--accent-amber); color: #fff; }
+        .btn-purple { background-color: var(--accent-purple); color: #fff; }
+        .btn-sm { padding: 6px 12px; font-size: 0.78rem; border-radius: 8px; }
+        .btn-theme { background: var(--bg-input); border: 1px solid var(--border); padding: 8px 14px; border-radius: 20px; cursor: pointer; font-size: 0.8rem; font-weight: 600; }
+
+        .val-plus { color: var(--accent-green); font-weight: 700; }
+        .val-minus { color: var(--accent-red); font-weight: 700; }
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; background: var(--bg-input); border: 1px solid var(--border); font-weight: 600; }
+        .badge-danger { background: rgba(239, 68, 68, 0.15); color: var(--accent-red); border-color: rgba(239, 68, 68, 0.3); }
+        .badge-warning { background: rgba(245, 158, 11, 0.15); color: var(--accent-amber); border-color: rgba(245, 158, 11, 0.3); }
+        .badge-success { background: rgba(16, 185, 129, 0.15); color: var(--accent-green); border-color: rgba(16, 185, 129, 0.3); }
+
+        .chat-container { height: 260px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-right: 6px; }
+        .msg { padding: 10px 14px; border-radius: var(--radius-sm); font-size: 0.85rem; max-width: 85%; line-height: 1.5; }
+        .msg-user { background-color: var(--primary); color: #fff; align-self: flex-end; border-bottom-right-radius: 2px; }
+        .msg-ai { background-color: var(--bg-input); border: 1px solid var(--border); align-self: flex-start; border-bottom-left-radius: 2px; }
+
+        /* Pulse Upload Box */
+        .upload-box {
+            border: 2px dashed var(--border); border-radius: var(--radius); padding: 32px 20px;
+            text-align: center; background: var(--bg-input); cursor: pointer; transition: 0.2s;
+        }
+        .upload-box:hover { border-color: var(--primary); background: var(--primary-light); }
+        
+        .chart-wrapper { position: relative; width: 100%; height: 240px; }
+    </style>
+</head>
+<body>
+
+    <div id="auth-screen">
+        <div class="auth-card">
+            <div class="brand-title-container">
+                <div class="brand-main-text">PULSE</div>
+                <div class="brand-slogan">FINANÇAS</div>
+            </div>
+            <p style="color:var(--text-muted); font-size:0.85rem; font-weight:500;">Controle financeiro inteligente e descomplicado</p>
+            
+            <form id="auth-form" onsubmit="handleAuth(event)" style="display:flex; flex-direction:column; gap:14px; margin-top:8px;">
+                <input type="email" id="auth-email" placeholder="E-mail" required value="usuario@pulse.com.br">
+                <input type="password" id="auth-pass" placeholder="Senha" required value="123456">
+                <button type="submit" class="btn-primary" id="auth-btn" style="padding:12px; font-size:0.9rem;">Entrar na Conta</button>
+            </form>
+            <div style="display:flex; justify-content:space-between; font-size:0.8rem; font-weight:600;">
+                <a href="#" style="color:var(--primary); text-decoration:none;" onclick="toggleAuthMode('recovery')">Esqueceu a senha?</a>
+                <a href="#" style="color:var(--primary); text-decoration:none;" onclick="toggleAuthMode('register')">Criar Conta</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="app-screen">
+        <sidebar>
+            <div>
+                <div class="brand-logo">
+                    <div class="brand-title-container">
+                        <div class="brand-main-text" style="font-size: 1.4rem;">PULSE</div>
+                        <div class="brand-slogan" style="font-size: 0.58rem;">FINANÇAS</div>
+                    </div>
+                </div>
+                <div class="nav-list">
+                    <div class="nav-item active" onclick="navigate('dashboard')">📊 Visão Geral</div>
+                    <div class="nav-item" onclick="navigate('financeiro')">💸 Transações</div>
+                    <div class="nav-item" onclick="navigate('contas')">🏦 Contas e Cartões</div>
+                    <div class="nav-item" onclick="navigate('categorias')">🏷️ Categorias</div>
+                    <div class="nav-item" onclick="navigate('planejamento')">🎯 Orçamentos & Metas</div>
+                    <div class="nav-item" onclick="navigate('patrimonio')">🏛️ Bens & Dívidas</div>
+                    <div class="nav-item" onclick="navigate('relatorios')">📈 Relatórios</div>
+                    <div class="nav-item" onclick="navigate('meses')">🗓️ Histórico mensal</div>
+                    <div class="nav-item" onclick="navigate('educacao')">💡 Aprender</div>
+                    <div class="nav-item" onclick="navigate('inteligencia')">🤖 Pulse IA</div>
+                    <div class="nav-item" onclick="navigate('importacao')">📥 Importar Extrato</div>
+                    <div class="nav-item" onclick="navigate('configuracoes')">⚙️ Ajustes</div>
+                </div>
+            </div>
+            <div style="padding: 0 16px;">
+                <button class="btn-red btn-sm" style="width:100%; padding:10px 0; border-radius:10px;" onclick="logout()">
+                    <i class="fa-solid fa-right-from-bracket"></i> Sair
+                </button>
+            </div>
+        </sidebar>
+
+        <main>
+            <header>
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <h4 id="page-title" style="font-weight:800; font-size:1.25rem;">Visão Geral</h4>
+                </div>
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <button class="btn-primary btn-sm" onclick="navigate('financeiro'); clearTxForm();" style="padding:8px 16px;">
+                        <i class="fa-solid fa-plus"></i> Transação
+                    </button>
+                    <button class="btn-theme" id="theme-toggle-btn" onclick="toggleTheme()" title="Alternar Tema Claro/Escuro">🌙 Escuro</button>
+                    <span id="user-display" class="badge" style="padding:6px 12px;">usuario@pulse.com.br</span>
+                    <button class="btn-amber btn-sm" onclick="resetData()">Resetar</button>
+                </div>
+            </header>
+
+            <!-- VIEW DASHBOARD -->
+            <div id="view-dashboard" class="view-section active">
+                <div class="grid-4">
+                    <div class="card">
+                        <small style="color:var(--text-muted); font-size:0.75rem; font-weight:700; text-transform:uppercase;">SALDO TOTAL EM CONTAS</small>
+                        <h2 id="dash-saldo" class="val-plus" style="margin-top:8px; font-weight:800; font-size:1.75rem;">R$ 0,00</h2>
+                    </div>
+                    <div class="card">
+                        <small style="color:var(--text-muted); font-size:0.75rem; font-weight:700; text-transform:uppercase;">RECEITAS DO MÊS</small>
+                        <h2 id="dash-receitas" class="val-plus" style="margin-top:8px; font-weight:800; font-size:1.75rem;">R$ 0,00</h2>
+                    </div>
+                    <div class="card">
+                        <small style="color:var(--text-muted); font-size:0.75rem; font-weight:700; text-transform:uppercase;">DESPESAS DO MÊS</small>
+                        <h2 id="dash-despesas" class="val-minus" style="margin-top:8px; font-weight:800; font-size:1.75rem;">R$ 0,00</h2>
+                    </div>
+                    <div class="card">
+                        <small style="color:var(--text-muted); font-size:0.75rem; font-weight:700; text-transform:uppercase;">BALANÇO LÍQUIDO</small>
+                        <h2 id="dash-resultado" style="margin-top:8px; font-weight:800; font-size:1.75rem;">R$ 0,00</h2>
+                    </div>
+                </div>
+
+                <!-- Gráficos Visuais no Dashboard -->
+                <div class="grid-2-equal">
+                    <div class="card">
+                        <div class="card-header"><h5 style="font-weight:700; font-size:1rem;">Fluxo Financeiro</h5></div>
+                        <div class="chart-wrapper">
+                            <canvas id="chart-dash-balance"></canvas>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header"><h5 style="font-weight:700; font-size:1rem;">Despesas por Categoria</h5></div>
+                        <div class="chart-wrapper">
+                            <canvas id="chart-dash-cats"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 style="font-weight:700; font-size:1rem;">Contas a Pagar / Receber</h5>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr><th>Vencimento</th><th>Descrição</th><th>Tipo</th><th>Valor</th></tr>
+                            </thead>
+                            <tbody id="tb-pendentes"></tbody>
+                        </table>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 style="font-weight:700; font-size:1rem;">Resumo da Conta</h5>
+                        </div>
+                        <div style="display:flex; flex-direction:column; gap:16px;" id="dash-indicadores"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW FINANCEIRO -->
+            <div id="view-financeiro" class="view-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 id="form-tx-title" style="font-weight:700; font-size:1rem;">Nova Transação</h5>
+                        <button class="btn-amber btn-sm" id="btn-cancel-tx" style="display:none" onclick="clearTxForm()">Cancelar Edição</button>
+                    </div>
+                    <form id="form-tx" onsubmit="saveTx(event)" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:12px;">
+                        <input type="hidden" id="tx-id">
+                        <input type="text" id="tx-desc" placeholder="Descrição da Despesa/Receita" required>
+                        <input type="number" step="0.01" id="tx-val" placeholder="Valor (R$)" required>
+                        <select id="tx-tipo">
+                            <option value="despesa">Despesa (-)</option>
+                            <option value="receita">Receita (+)</option>
+                            <option value="transferencia">Transferência</option>
+                        </select>
+                        <input type="date" id="tx-date" required>
+                        <select id="tx-conta"></select>
+                        <select id="tx-cat" required></select>
+                        <input type="text" id="tx-tag" placeholder="Tag / Etiqueta">
+                        <select id="tx-status">
+                            <option value="pago">Concluído / Pago</option>
+                            <option value="pendente">Pendente</option>
+                        </select>
+                        <button type="submit" class="btn-primary" id="btn-save-tx">Salvar Registro</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 style="font-weight:700; font-size:1rem;">Histórico de Transações</h5>
+                        <input type="text" id="tx-search" placeholder="🔍 Pesquisar..." oninput="renderTxTable()" style="width:200px;">
+                    </div>
+                    <table>
+                        <thead>
+                            <tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Conta/Cartão</th><th>Status</th><th>Valor</th><th>Ações</th></tr>
+                        </thead>
+                        <tbody id="tb-tx"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- VIEW CONTAS -->
+            <div id="view-contas" class="view-section">
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-header"><h5 style="font-weight:700; font-size:1rem;">Contas Bancárias</h5></div>
+                        <form onsubmit="saveConta(event)" style="display:flex; gap:10px; margin-bottom:16px;">
+                            <input type="text" id="acc-name" placeholder="Nome da Conta (ex: Itaú, Nubank)" required style="flex:1">
+                            <input type="number" step="0.01" id="acc-bal" placeholder="Saldo Inicial" required style="width:130px">
+                            <button type="submit" class="btn-primary">+ Conta</button>
+                        </form>
+                        <table>
+                            <thead><tr><th>Instituição</th><th>Saldo</th><th>Ação</th></tr></thead>
+                            <tbody id="tb-contas"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header"><h5 style="font-weight:700; font-size:1rem;">Cartões de Crédito</h5></div>
+                        <form onsubmit="saveCartao(event)" style="display:flex; gap:10px; margin-bottom:16px;">
+                            <input type="text" id="card-name" placeholder="Nome do Cartão" required style="flex:1">
+                            <input type="number" step="0.01" id="card-lim" placeholder="Limite Total" required style="width:130px">
+                            <button type="submit" class="btn-purple">+ Cartão</button>
+                        </form>
+                        <table>
+                            <thead><tr><th>Cartão</th><th>Limite Total</th><th>Ação</th></tr></thead>
+                            <tbody id="tb-cartoes"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW CATEGORIAS -->
+            <div id="view-categorias" class="view-section">
+                <div class="card">
+                    <div class="card-header"><h5 style="font-weight:700; font-size:1rem;">Categorias Personalizadas</h5></div>
+                    <form onsubmit="saveCategoria(event)" style="display:flex; gap:10px; margin-bottom:16px;">
+                        <input type="text" id="cat-new-name" placeholder="Nome da Categoria (ex: Mercado, Saúde, Lazer)" required style="flex:1">
+                        <select id="cat-new-tipo" style="width:150px;">
+                            <option value="despesa">Despesa (-)</option>
+                            <option value="receita">Receita (+)</option>
+                        </select>
+                        <button type="submit" class="btn-primary">+ Categoria</button>
+                    </form>
+                    <table>
+                        <thead><tr><th>Categoria</th><th>Tipo</th><th>Ação</th></tr></thead>
+                        <tbody id="tb-categorias"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- VIEW PLANEJAMENTO -->
+            <div id="view-planejamento" class="view-section">
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-header"><h5 style="font-weight:700; font-size:1rem;">Orçamento por Categoria</h5></div>
+                        <form onsubmit="saveLimite(event)" style="display:flex; gap:10px; margin-bottom:16px;">
+                            <select id="lim-cat" required style="flex:1"></select>
+                            <input type="number" step="0.01" id="lim-val" placeholder="Teto R$" required style="width:130px">
+                            <button type="submit" class="btn-amber">Definir Teto</button>
+                        </form>
+                        <div id="limites-list" style="display:flex; flex-direction:column; gap:14px;"></div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header"><h5 style="font-weight:700; font-size:1rem;">Metas Financeiras</h5></div>
+                        <form onsubmit="saveMeta(event)" style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">
+                            <input type="text" id="meta-desc" placeholder="Objetivo (ex: Viagem, Reserva)" required>
+                            <input type="number" step="0.01" id="meta-target" placeholder="Valor Meta R$" required>
+                            <input type="number" step="0.01" id="meta-current" placeholder="Valor Já Guardado R$" required>
+                            <button type="submit" class="btn-green">+ Adicionar Meta</button>
+                        </form>
+                        <div id="metas-list" style="display:flex; flex-direction:column; gap:14px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW PATRIMÔNIO -->
+            <div id="view-patrimonio" class="view-section">
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-header"><h5 style="font-weight:700; font-size:1rem;">Bens e Ativos</h5></div>
+                        <form onsubmit="savePatrimonio(event, 'ativo')" style="display:flex; gap:10px; margin-bottom:16px;">
+                            <input type="text" id="ast-name" placeholder="Ativo (ex: Veículo, Imóvel, Investimentos)" required style="flex:1">
+                            <input type="number" step="0.01" id="ast-val" placeholder="Valor R$" required style="width:130px">
+                            <button type="submit" class="btn-green">+ Ativo</button>
+                        </form>
+                        <table>
+                            <thead><tr><th>Item</th><th>Valor</th><th>Ação</th></tr></thead>
+                            <tbody id="tb-ativos"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header"><h5 style="font-weight:700; font-size:1rem;">Dívidas e Passivos</h5></div>
+                        <form onsubmit="savePatrimonio(event, 'passivo')" style="display:flex; gap:10px; margin-bottom:16px;">
+                            <input type="text" id="pas-name" placeholder="Passivo (ex: Financiamento, Empréstimo)" required style="flex:1">
+                            <input type="number" step="0.01" id="pas-val" placeholder="Valor R$" required style="width:130px">
+                            <button type="submit" class="btn-red">+ Passivo</button>
+                        </form>
+                        <table>
+                            <thead><tr><th>Item</th><th>Valor</th><th>Ação</th></tr></thead>
+                            <tbody id="tb-passivos"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW RELATÓRIOS -->
+            <div id="view-relatorios" class="view-section">
+                <div class="card">
+                    <h5 style="font-weight:700; font-size:1rem; margin-bottom:14px;">🔍 Filtrar Análise</h5>
+                    <div style="display:flex; gap:14px; flex-wrap:wrap;">
+                        <div style="flex:1; min-width:140px;">
+                            <label style="font-size:0.75rem; color:var(--text-muted); font-weight:600; display:block; margin-bottom:6px;">Mês</label>
+                            <select id="rep-filter-month" onchange="renderApp()" style="width:100%;">
+                                <option value="">Todos os Meses</option>
+                                <option value="01">Janeiro</option><option value="02">Fevereiro</option>
+                                <option value="03">Março</option><option value="04">Abril</option>
+                                <option value="05">Maio</option><option value="06">Junho</option>
+                                <option value="07">Julho</option><option value="08">Agosto</option>
+                                <option value="09">Setembro</option><option value="10">Outubro</option>
+                                <option value="11">Novembro</option><option value="12">Dezembro</option>
+                            </select>
+                        </div>
+                        <div style="flex:1; min-width:140px;">
+                            <label style="font-size:0.75rem; color:var(--text-muted); font-weight:600; display:block; margin-bottom:6px;">Ano</label>
+                            <select id="rep-filter-year" onchange="renderApp()" style="width:100%;">
+                                <option value="">Todos os Anos</option>
+                            </select>
+                        </div>
+                        <div style="flex:1; min-width:140px;">
+                            <label style="font-size:0.75rem; color:var(--text-muted); font-weight:600; display:block; margin-bottom:6px;">Categoria</label>
+                            <select id="rep-filter-cat" onchange="renderApp()" style="width:100%;">
+                                <option value="">Todas as Categorias</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid-4">
+                    <div class="card">
+                        <small style="color:var(--text-muted); font-size:0.75rem; font-weight:700; text-transform:uppercase;">RECEITAS</small>
+                        <h3 id="rep-total-rec" class="val-plus" style="margin-top:6px; font-weight:800;">R$ 0,00</h3>
+                    </div>
+                    <div class="card">
+                        <small style="color:var(--text-muted); font-size:0.75rem; font-weight:700; text-transform:uppercase;">DESPESAS</small>
+                        <h3 id="rep-total-desp" class="val-minus" style="margin-top:6px; font-weight:800;">R$ 0,00</h3>
+                    </div>
+                    <div class="card">
+                        <small style="color:var(--text-muted); font-size:0.75rem; font-weight:700; text-transform:uppercase;">RESULTADO</small>
+                        <h3 id="rep-total-bal" style="margin-top:6px; font-weight:800;">R$ 0,00</h3>
+                    </div>
+                    <div class="card">
+                        <small style="color:var(--text-muted); font-size:0.75rem; font-weight:700; text-transform:uppercase;">TRANSAÇÕES</small>
+                        <h3 id="rep-total-count" style="margin-top:6px; font-weight:800;">0</h3>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h5 style="font-weight:700; font-size:1rem; margin-bottom:14px;">Distribuição de Despesas Filtradas</h5>
+                    <div class="chart-wrapper">
+                        <canvas id="chart-rep-pie"></canvas>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h5 style="font-weight:700; font-size:1rem; margin-bottom:12px;">Despesas por Categoria</h5>
+                    <table>
+                        <thead><tr><th>Categoria</th><th>Total Gasto</th><th>Participação</th></tr></thead>
+                        <tbody id="tb-rep-cat"></tbody>
+                    </table>
+                </div>
+
+                <div class="card">
+                    <h5 style="font-weight:700; font-size:1rem; margin-bottom:12px;">Detalhamento Filtrado</h5>
+                    <table>
+                        <thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Tipo</th><th>Valor</th></tr></thead>
+                        <tbody id="tb-rep-tx"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- VIEW INTELIGÊNCIA -->
+            <div id="view-inteligencia" class="view-section">
+                <div class="grid-2">
+                    <div class="card">
+                        <h5 style="font-weight:700; font-size:1rem;">🤖 Pulse AI Assistant</h5>
+                        <p style="color:var(--text-muted); font-size:0.8rem; margin-bottom:12px;">Obtenha insights instantâneos sobre seu fluxo financeiro.</p>
+                        <div class="chat-container" id="ai-messages">
+                            <div class="msg msg-ai">Olá! Sou o assistente Pulse. Como posso ajudar nas suas finanças hoje?</div>
+                        </div>
+                        <form onsubmit="sendAiMessage(event)" style="display:flex; gap:10px; margin-top:14px;">
+                            <input type="text" id="ai-input" placeholder="Ex: 'qual é o meu saldo?' ou 'quanto gastei?'" style="flex:1">
+                            <button type="submit" class="btn-primary">Enviar</button>
+                        </form>
+                    </div>
+
+                    <div class="card">
+                        <h5 style="font-weight:700; font-size:1rem;">🔔 Alertas & Dicas</h5>
+                        <div id="sys-alerts" style="display:flex; flex-direction:column; gap:12px; margin-top:12px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW IMPORTAÇÃO -->
+            <div id="view-importacao" class="view-section">
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-header" style="margin-bottom:12px;">
+                            <h5 style="font-weight:700; font-size:1rem;">1. Seleção de Arquivo (OFX, CSV, XLS)</h5>
+                        </div>
+
+                        <div style="margin-bottom: 16px; background: var(--bg-input); padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+                            <label style="font-size:0.8rem; font-weight:600; color:var(--text); display:block; margin-bottom:8px;">
+                                Destino da Importação:
+                            </label>
+                            <select id="import-destino" style="width: 100%;">
+                                <option value="">-- Escolha a Conta ou Cartão --</option>
+                            </select>
+                        </div>
+
+                        <div id="import-mode-file">
+                            <div class="upload-box" id="drop-zone" onclick="iniciarImportacaoManual()">
+                                <p style="font-weight:700; color:var(--primary); font-size:1rem;">Arraste ou Clique para Enviar</p>
+                                <p style="color:var(--text-muted); font-size:0.8rem; margin-top:6px;">Suporta arquivos de extrato bancário <strong>.OFX</strong>, <strong>.CSV</strong> e <strong>.XLS</strong></p>
+                            </div>
+                            <input type="file" id="file-input" accept=".ofx,.csv,.txt,.xls" style="display:none;" onchange="handleFileUpload(event)">
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h5 style="font-weight:700; font-size:1rem;">📤 Backup e Exportação</h5>
+                        <p style="color:var(--text-muted); font-size:0.8rem; margin-bottom:16px;">Baixe seus registros completos a qualquer momento.</p>
+                        <div style="display:flex; gap:12px;">
+                            <button class="btn-green btn-sm" onclick="exportData('json')" style="padding:10px 16px;">Exportar JSON</button>
+                            <button class="btn-amber btn-sm" onclick="exportData('csv')" style="padding:10px 16px;">Exportar CSV</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" id="card-conciliacao" style="display:none;">
+                    <div class="card-header">
+                        <div>
+                            <h5 style="font-weight:700; font-size:1rem;">2. Conciliação Bancária</h5>
+                            <small style="color:var(--text-muted)">Confira e categorize suas transações antes de efetivar</small>
+                        </div>
+                        <div style="display:flex; gap:10px;">
+                            <button class="btn-green btn-sm" onclick="confirmarImportacao('apenas_novos')">Apenas Novos</button>
+                            <button class="btn-primary btn-sm" onclick="confirmarImportacao('tudo')">Importar Todos</button>
+                            <button class="btn-red btn-sm" onclick="cancelarConciliacao()">Cancelar</button>
+                        </div>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Status</th>
+                                <th>Data</th>
+                                <th>Descrição</th>
+                                <th>Valor</th>
+                                <th>Categoria</th>
+                                <th>Observação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tb-conciliacao"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- VIEW CONFIGURAÇÕES -->
+            <div id="view-configuracoes" class="view-section">
+                <div class="card">
+                    <h5 style="font-weight:700; font-size:1rem;">Preferências da Conta</h5>
+                    <div style="display:flex; flex-direction:column; gap:14px; max-width:300px; margin-top:16px;">
+                        <label style="font-size:0.8rem; color:var(--text-muted); font-weight:600;">Moeda Padrão</label>
+                        <select id="pref-currency"><option value="BRL">BRL (R$)</option><option value="USD">USD ($)</option></select>
+                        <label style="font-size:0.8rem; color:var(--text-muted); font-weight:600;">Privacidade e Acesso</label>
+                        <button class="btn-red btn-sm" onclick="alert('Sessão encerrada nos outros aparelhos.')">Desconectar Outros Dispositivos</button>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        // ESTADO GLOBAL DA APLICAÇÃO
+        const DEFAULT_STATE = {
+            theme: 'dark',
+            authenticated: true,
+            userEmail: 'usuario@pulse.com.br',
+            categorias: [
+                { id: 1, nome: 'Alimentação', tipo: 'despesa' },
+                { id: 2, nome: 'Transporte', tipo: 'despesa' },
+                { id: 3, nome: 'Moradia', tipo: 'despesa' },
+                { id: 4, nome: 'Lazer', tipo: 'despesa' },
+                { id: 5, nome: 'Saúde', tipo: 'despesa' },
+                { id: 6, nome: 'Salário', tipo: 'receita' },
+                { id: 7, nome: 'Investimentos', tipo: 'receita' }
+            ],
+            contas: [
+                { id: 1, nome: 'Nubank', saldo: 2850.00 },
+                { id: 2, nome: 'Itaú', saldo: 1420.50 }
+            ],
+            cartoes: [
+                { id: 1, nome: 'Nubank Mastercard', limite: 6000.00 },
+                { id: 2, nome: 'Itaú Visa Click', limite: 4500.00 }
+            ],
+            transacoes: [
+                { id: 1, desc: 'Salário Mensal', val: 6500.00, tipo: 'receita', date: '2026-08-01', contaId: 'conta_1', cat: 'Salário', tag: 'Fixo', status: 'pago' },
+                { id: 2, desc: 'Supermercado', val: 580.40, tipo: 'despesa', date: '2026-08-12', contaId: 'cartao_1', cat: 'Alimentação', tag: 'Mensal', status: 'pago' },
+                { id: 3, desc: 'Internet Fibra', val: 129.90, tipo: 'despesa', date: '2026-08-28', contaId: 'conta_2', cat: 'Moradia', tag: 'Contas', status: 'pendente' }
+            ],
+            limites: [
+                { id: 1, cat: 'Alimentação', val: 1200.00 }
+            ],
+            metas: [
+                { id: 1, desc: 'Reserva de Emergência', target: 15000.00, current: 4270.50 }
+            ],
+            patrimonio: [
+                { id: 1, tipo: 'ativo', nome: 'Ações / FIIs', val: 8500.00 },
+                { id: 2, tipo: 'passivo', nome: 'Financiamento Veículo', val: 14000.00 }
+            ]
+        };
+
+        let db = JSON.parse(localStorage.getItem('pulse_db_v1')) || DEFAULT_STATE;
+
+        // Instâncias de Gráficos Chart.js
+        let chartDashBalanceInstance = null;
+        let chartDashCatsInstance = null;
+        let chartRepPieInstance = null;
+
+        function validarIntegridadeDB() {
+            if (!db || typeof db !== 'object') db = JSON.parse(JSON.stringify(DEFAULT_STATE));
+            if (!db.theme) db.theme = 'dark';
+            if (!Array.isArray(db.categorias)) db.categorias = [];
+            if (!Array.isArray(db.contas)) db.contas = [];
+            if (!Array.isArray(db.cartoes)) db.cartoes = [];
+            if (!Array.isArray(db.transacoes)) db.transacoes = [];
+            if (!Array.isArray(db.limites)) db.limites = [];
+            if (!Array.isArray(db.metas)) db.metas = [];
+            if (!Array.isArray(db.patrimonio)) db.patrimonio = [];
+        }
+
+        validarIntegridadeDB();
+
+        let filaImportacaoStaging = [];
+
+        function saveDB() {
+            localStorage.setItem('pulse_db_v1', JSON.stringify(db));
+            renderApp();
+        }
+
+        function resetData() {
+            if(confirm("Deseja realmente zerar todas as informações da conta? Todas as transações, contas, cartões, categorias, metas e patrimônios serão apagados permanentemente.")) {
+                db = {
+                    theme: db.theme || 'dark',
+                    authenticated: true,
+                    userEmail: db.userEmail || 'usuario@pulse.com.br',
+                    categorias: [],
+                    contas: [],
+                    cartoes: [],
+                    transacoes: [],
+                    limites: [],
+                    metas: [],
+                    patrimonio: []
+                };
+                saveDB();
+            }
+        }
+
+        // TEMA CLARO E ESCURO
+        function toggleTheme() {
+            db.theme = db.theme === 'dark' ? 'light' : 'dark';
+            saveDB();
+        }
+
+        function applyTheme() {
+            document.documentElement.setAttribute('data-theme', db.theme || 'dark');
+            const btn = document.getElementById('theme-toggle-btn');
+            if(btn) {
+                btn.innerText = db.theme === 'dark' ? '🌙 Escuro' : '☀️ Claro';
+            }
+        }
+
+        // AUTENTICAÇÃO E NAVEGAÇÃO
+        function handleAuth(e) {
+            e.preventDefault();
+            db.authenticated = true;
+            db.userEmail = document.getElementById('auth-email').value;
+            saveDB();
+            checkAuth();
+        }
+
+        function logout() {
+            db.authenticated = false;
+            saveDB();
+            checkAuth();
+        }
+
+        function checkAuth() {
+            const authScreen = document.getElementById('auth-screen');
+            if(db.authenticated) {
+                authScreen.style.display = 'none';
+                document.getElementById('user-display').innerText = db.userEmail || 'usuario@pulse.com.br';
+            } else {
+                authScreen.style.display = 'flex';
+            }
+        }
+
+        function toggleAuthMode(mode) {
+            const btn = document.getElementById('auth-btn');
+            if(mode === 'register') {
+                btn.innerText = "Cadastrar Conta Pulse";
+            } else if(mode === 'recovery') {
+                btn.innerText = "Enviar Instruções";
+            }
+        }
+
+        function navigate(view) {
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            
+            const targetNav = Array.from(document.querySelectorAll('.nav-item')).find(el => el.getAttribute('onclick')?.includes(view));
+            if(targetNav) targetNav.classList.add('active');
+            
+            const targetView = document.getElementById(`view-${view}`);
+            if (targetView) {
+                targetView.classList.add('active');
+                document.getElementById('page-title').innerText = targetNav ? targetNav.innerText.replace(/[\u{1F300}-\u{1F9FF}]/gu, '').trim() : view;
+            }
+        }
+
+        // TRANSAÇÕES
+        function saveTx(e) {
+            e.preventDefault();
+            const id = document.getElementById('tx-id').value;
+            const txData = {
+                id: id ? parseInt(id) : Date.now(),
+                desc: document.getElementById('tx-desc').value,
+                val: parseFloat(document.getElementById('tx-val').value) || 0,
+                tipo: document.getElementById('tx-tipo').value,
+                date: document.getElementById('tx-date').value,
+                contaId: document.getElementById('tx-conta').value,
+                cat: document.getElementById('tx-cat').value || 'Geral',
+                tag: document.getElementById('tx-tag').value || '',
+                status: document.getElementById('tx-status').value
+            };
+
+            if(id) {
+                const index = db.transacoes.findIndex(t => t.id === parseInt(id));
+                if(index !== -1) db.transacoes[index] = txData;
+            } else {
+                db.transacoes.push(txData);
+            }
+
+            clearTxForm();
+            saveDB();
+        }
+
+        function editTx(id) {
+            const t = db.transacoes.find(x => x.id === id);
+            if(!t) return;
+            document.getElementById('tx-id').value = t.id;
+            document.getElementById('tx-desc').value = t.desc || '';
+            document.getElementById('tx-val').value = t.val || 0;
+            document.getElementById('tx-tipo').value = t.tipo || 'despesa';
+            document.getElementById('tx-date').value = t.date || new Date().toISOString().split('T')[0];
+            document.getElementById('tx-conta').value = t.contaId || '';
+            document.getElementById('tx-cat').value = t.cat || 'Geral';
+            document.getElementById('tx-tag').value = t.tag || '';
+            document.getElementById('tx-status').value = t.status || 'pago';
+
+            document.getElementById('form-tx-title').innerText = "Editar Transação";
+            document.getElementById('btn-cancel-tx').style.display = "inline-block";
+            navigate('financeiro');
+        }
+
+        function clearTxForm() {
+            document.getElementById('tx-id').value = '';
+            document.getElementById('form-tx').reset();
+            document.getElementById('tx-date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('form-tx-title').innerText = "Nova Transação";
+            document.getElementById('btn-cancel-tx').style.display = "none";
+        }
+
+        function deleteTx(id) {
+            if(confirm("Deseja apagar esta transação?")) {
+                db.transacoes = db.transacoes.filter(t => t.id !== id);
+                saveDB();
+            }
+        }
+
+        // CONTAS E CARTÕES
+        function saveConta(e) {
+            e.preventDefault();
+            db.contas.push({ id: Date.now(), nome: document.getElementById('acc-name').value, saldo: parseFloat(document.getElementById('acc-bal').value) || 0 });
+            document.getElementById('acc-name').value = ''; document.getElementById('acc-bal').value = '';
+            saveDB();
+        }
+
+        function deleteConta(id) {
+            db.contas = db.contas.filter(c => c.id !== id);
+            saveDB();
+        }
+
+        function saveCartao(e) {
+            e.preventDefault();
+            db.cartoes.push({ id: Date.now(), nome: document.getElementById('card-name').value, limite: parseFloat(document.getElementById('card-lim').value) || 0 });
+            document.getElementById('card-name').value = ''; document.getElementById('card-lim').value = '';
+            saveDB();
+        }
+
+        function deleteCartao(id) {
+            db.cartoes = db.cartoes.filter(c => c.id !== id);
+            saveDB();
+        }
+
+        // CATEGORIAS
+        function saveCategoria(e) {
+            e.preventDefault();
+            const nomeInput = document.getElementById('cat-new-name');
+            const tipoInput = document.getElementById('cat-new-tipo');
+            if(!nomeInput.value.trim()) return;
+
+            db.categorias.push({ id: Date.now(), nome: nomeInput.value.trim(), tipo: tipoInput.value });
+            nomeInput.value = '';
+            saveDB();
+        }
+
+        function deleteCategoria(id) {
+            if(confirm("Excluir categoria?")) {
+                db.categorias = db.categorias.filter(c => c.id !== id);
+                saveDB();
+            }
+        }
+
+        // PLANEJAMENTO
+        function saveLimite(e) {
+            e.preventDefault();
+            db.limites.push({ id: Date.now(), cat: document.getElementById('lim-cat').value, val: parseFloat(document.getElementById('lim-val').value) || 0 });
+            document.getElementById('lim-val').value = '';
+            saveDB();
+        }
+
+        function saveMeta(e) {
+            e.preventDefault();
+            db.metas.push({
+                id: Date.now(),
+                desc: document.getElementById('meta-desc').value,
+                target: parseFloat(document.getElementById('meta-target').value) || 0,
+                current: parseFloat(document.getElementById('meta-current').value) || 0
+            });
+            document.getElementById('meta-desc').value = ''; document.getElementById('meta-target').value = ''; document.getElementById('meta-current').value = '';
+            saveDB();
+        }
+
+        // PATRIMÔNIO
+        function savePatrimonio(e, tipo) {
+            e.preventDefault();
+            const nameEl = document.getElementById(tipo === 'ativo' ? 'ast-name' : 'pas-name');
+            const valEl = document.getElementById(tipo === 'ativo' ? 'ast-val' : 'pas-val');
+            db.patrimonio.push({ id: Date.now(), tipo, nome: nameEl.value, val: parseFloat(valEl.value) || 0 });
+            nameEl.value = ''; valEl.value = '';
+            saveDB();
+        }
+
+        function deletePatrimonio(id) {
+            db.patrimonio = db.patrimonio.filter(p => p.id !== id);
+            saveDB();
+        }
+
+        // IA ASSISTENTE
+        function sendAiMessage(e) {
+            e.preventDefault();
+            const input = document.getElementById('ai-input');
+            const txt = input.value.trim();
+            if(!txt) return;
+
+            const box = document.getElementById('ai-messages');
+            box.innerHTML += `<div class="msg msg-user">${txt}</div>`;
+            input.value = '';
+
+            setTimeout(() => {
+                let resp = "Não entendi sua solicitação. Posso fornecer seu 'saldo', 'despesas' ou 'balanço'.";
+                const q = txt.toLowerCase();
+                
+                if(q.includes('saldo')) {
+                    const saldoContas = db.contas.reduce((a,b)=>a+(b.saldo||0),0);
+                    resp = `Seu saldo acumulado nas contas é de <strong>R$ ${saldoContas.toFixed(2)}</strong>.`;
+                } else if(q.includes('despesa') || q.includes('gasto')) {
+                    const totalDesp = db.transacoes.filter(t=>t.tipo==='despesa').reduce((a,b)=>a+(b.val||0),0);
+                    resp = `Suas despesas registradas somam <strong>R$ ${totalDesp.toFixed(2)}</strong>.`;
+                } else if(q.includes('balanço') || q.includes('resultado')) {
+                    const rec = db.transacoes.filter(t=>t.tipo==='receita').reduce((a,b)=>a+(b.val||0),0);
+                    const desp = db.transacoes.filter(t=>t.tipo==='despesa').reduce((a,b)=>a+(b.val||0),0);
+                    resp = `Seu resultado atual (Receitas - Despesas) é <strong>R$ ${(rec - desp).toFixed(2)}</strong>.`;
+                }
+
+                box.innerHTML += `<div class="msg msg-ai">${resp}</div>`;
+                box.scrollTop = box.scrollHeight;
+            }, 250);
+        }
+
+        // PARSER E IMPORTAÇÃO
+        function iniciarImportacaoManual() {
+            const destino = document.getElementById('import-destino').value;
+            if(!destino) {
+                alert('Escolha a Conta ou Cartão de destino antes de importar o arquivo!');
+                return;
+            }
+            document.getElementById('file-input').click();
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                analisarEConciliar(e.target.result);
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        function parseConteudoEntrada(raw) {
+            const transacoesExtraidas = [];
+            const catPadrao = db.categorias[0]?.nome || 'Geral';
+
+            if(raw.includes('<STMTTRN>') || raw.includes('OFXHEADER')) {
+                const trnBlocks = raw.split(/<\/STMTTRN>|<STMTTRN>/i);
+                trnBlocks.forEach(block => {
+                    if(block.includes('<TRNAMT>') || block.includes('<AMT>')) {
+                        const amtMatch = block.match(/<(?:TRNAMT|AMT)>([\d\.\-]+)/i);
+                        const memoMatch = block.match(/<(?:MEMO|NAME)>([^<\n\r]+)/i);
+                        const dateMatch = block.match(/<(?:DTPOSTED|DTSTART)>(\d{8})/i);
+
+                        if(amtMatch) {
+                            const rawVal = parseFloat(amtMatch[1]);
+                            const val = Math.abs(rawVal);
+                            const tipo = rawVal >= 0 ? 'receita' : 'despesa';
+                            const desc = memoMatch ? memoMatch[1].trim() : 'Lançamento OFX';
+                            
+                            let dateStr = new Date().toISOString().split('T')[0];
+                            if(dateMatch) {
+                                const y = dateMatch[1].substring(0,4);
+                                const m = dateMatch[1].substring(4,6);
+                                const d = dateMatch[1].substring(6,8);
+                                dateStr = `${y}-${m}-${d}`;
+                            }
+
+                            transacoesExtraidas.push({ date: dateStr, desc, val, tipo, cat: catPadrao });
+                        }
+                    }
+                });
+                return transacoesExtraidas;
+            }
+
+            const lines = raw.split('\n');
+            lines.forEach(line => {
+                if(!line.trim() || line.startsWith('Data') || line.startsWith('Date')) return;
+                
+                const parts = line.split(/[,;\t]/);
+                if(parts.length >= 3) {
+                    const dataImp = parts[0]?.trim() || new Date().toISOString().split('T')[0];
+                    const descImp = parts[1]?.trim() || 'Lançamento Importado';
+                    const valImp = parseFloat(parts[2]?.trim().replace('R$', '').replace(',', '.')) || 0;
+                    const tipoImp = (parts[3]?.trim().toLowerCase() === 'receita' || valImp > 0) ? 'receita' : 'despesa';
+                    const catImp = parts[4]?.trim() || catPadrao;
+
+                    transacoesExtraidas.push({ date: dataImp, desc: descImp, val: Math.abs(valImp), tipo: tipoImp, cat: catImp });
+                }
+            });
+
+            return transacoesExtraidas;
+        }
+
+        function updateStagingItem(index, key, value) {
+            if (filaImportacaoStaging[index]) {
+                filaImportacaoStaging[index][key] = value;
+            }
+        }
+
+        function analisarEConciliar(raw) {
+            if(!raw || !raw.trim()) {
+                alert("Selecione um arquivo válido.");
+                return;
+            }
+
+            const transacoesParsed = parseConteudoEntrada(raw);
+            if(transacoesParsed.length === 0) {
+                alert("Formato de arquivo não reconhecido.");
+                return;
+            }
+
+            const destinoSelecionado = document.getElementById('import-destino').value;
+            filaImportacaoStaging = [];
+
+            transacoesParsed.forEach((item, index) => {
+                let matchStatus = 'novo';
+
+                const duplicataExata = db.transacoes.find(t => 
+                    t.date === item.date && 
+                    t.val === item.val && 
+                    (t.desc || '').toLowerCase() === (item.desc || '').toLowerCase()
+                );
+
+                if (duplicataExata) {
+                    matchStatus = 'duplicado_exato';
+                } else {
+                    const duplicataParcial = db.transacoes.find(t => {
+                        const diffDias = Math.abs((new Date(t.date) - new Date(item.date)) / (1000 * 60 * 60 * 24));
+                        return t.val === item.val && diffDias <= 3;
+                    });
+
+                    if (duplicataParcial) matchStatus = 'duplicado_parcial';
+                }
+
+                filaImportacaoStaging.push({
+                    idTemp: index,
+                    date: item.date,
+                    desc: item.desc,
+                    val: item.val,
+                    tipo: item.tipo,
+                    cat: db.categorias.some(c => c.nome.toLowerCase() === (item.cat || '').toLowerCase()) ? item.cat : (db.categorias[0]?.nome || 'Geral'),
+                    contaId: destinoSelecionado,
+                    status: 'pago',
+                    matchStatus,
+                    acaoSugerida: ''
+                });
+            });
+
+            renderizarPainelConciliacao();
+        }
+
+        function renderizarPainelConciliacao() {
+            const card = document.getElementById('card-conciliacao');
+            const tbody = document.getElementById('tb-conciliacao');
+            tbody.innerHTML = '';
+
+            if(filaImportacaoStaging.length === 0) {
+                card.style.display = 'none';
+                return;
+            }
+
+            card.style.display = 'block';
+
+            filaImportacaoStaging.forEach((item, index) => {
+                let badgeClass = 'badge-success';
+                let statusLabel = 'Novo';
+
+                if(item.matchStatus === 'duplicado_exato') {
+                    badgeClass = 'badge-danger';
+                    statusLabel = 'Duplicado';
+                } else if(item.matchStatus === 'duplicado_parcial') {
+                    badgeClass = 'badge-warning';
+                    statusLabel = 'Suspeito';
+                }
+
+                let catOptionsHtml = '';
+                db.categorias.forEach(c => {
+                    const selected = (c.nome.toLowerCase() === (item.cat || '').toLowerCase()) ? 'selected' : '';
+                    catOptionsHtml += `<option value="${c.nome}" ${selected}>${c.nome}</option>`;
+                });
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td><span class="badge ${badgeClass}">${statusLabel}</span></td>
+                        <td>${item.date}</td>
+                        <td><strong>${item.desc}</strong></td>
+                        <td class="${item.tipo==='receita'?'val-plus':'val-minus'}">R$ ${item.val.toFixed(2)}</td>
+                        <td>
+                            <select onchange="updateStagingItem(${index}, 'cat', this.value)" style="width: 100%;">
+                                ${catOptionsHtml}
+                            </select>
+                        </td>
+                        <td>
+                            <input type="text" value="${item.acaoSugerida || ''}" 
+                                oninput="updateStagingItem(${index}, 'acaoSugerida', this.value)" 
+                                placeholder="Observação..." style="width: 100%;">
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function confirmarImportacao(modo) {
+            let importados = 0;
+
+            filaImportacaoStaging.forEach(item => {
+                if (modo === 'tudo' || (modo === 'apenas_novos' && item.matchStatus === 'novo')) {
+                    db.transacoes.push({
+                        id: Date.now() + Math.floor(Math.random() * 10000),
+                        desc: item.desc,
+                        val: item.val,
+                        tipo: item.tipo,
+                        cat: item.cat,
+                        tag: item.acaoSugerida || '',
+                        date: item.date,
+                        contaId: item.contaId,
+                        status: item.status
+                    });
+                    importados++;
+                }
+            });
+
+            alert(`Importação concluída! ${importados} lançamentos sincronizados.`);
+            cancelarConciliacao();
+            saveDB();
+        }
+
+        function cancelarConciliacao() {
+            filaImportacaoStaging = [];
+            const fileInput = document.getElementById('file-input');
+            if(fileInput) fileInput.value = '';
+            document.getElementById('card-conciliacao').style.display = 'none';
+        }
+
+        function exportData(format) {
+            let str = "";
+            if(format === 'json') {
+                str = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db));
+            } else {
+                let csv = "Data,Descricao,Tipo,Categoria,Valor\n";
+                db.transacoes.forEach(t => { csv += `${t.date},${t.desc},${t.tipo},${t.cat},${t.val}\n`; });
+                str = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
+            }
+            const a = document.createElement('a');
+            a.setAttribute("href", str);
+            a.setAttribute("download", `pulse_backup.${format}`);
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        }
+
+        // SUPORTE A GRÁFICOS CHART.JS
+        function renderCharts(totalReceitas, totalDespesas, txFiltradas) {
+            const isDark = db.theme === 'dark';
+            const textColor = isDark ? '#f9fafb' : '#0f172a';
+            const gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
+
+            // 1. Dashboard Balance Bar Chart
+            const ctxBalance = document.getElementById('chart-dash-balance');
+            if (ctxBalance) {
+                if (chartDashBalanceInstance) chartDashBalanceInstance.destroy();
+                chartDashBalanceInstance = new Chart(ctxBalance, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Receitas', 'Despesas'],
+                        datasets: [{
+                            data: [totalReceitas, totalDespesas],
+                            backgroundColor: ['#10b981', '#ef4444'],
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { ticks: { color: textColor }, grid: { display: false } },
+                            y: { ticks: { color: textColor }, grid: { color: gridColor } }
+                        }
+                    }
+                });
+            }
+
+            // 2. Dashboard Category Doughnut Chart
+            const ctxCats = document.getElementById('chart-dash-cats');
+            if (ctxCats) {
+                const despesasMap = {};
+                db.transacoes.filter(t => t.tipo === 'despesa').forEach(t => {
+                    const cat = t.cat || 'Geral';
+                    despesasMap[cat] = (despesasMap[cat] || 0) + (t.val || 0);
+                });
+                const labels = Object.keys(despesasMap);
+                const data = Object.values(despesasMap);
+
+                if (chartDashCatsInstance) chartDashCatsInstance.destroy();
+                chartDashCatsInstance = new Chart(ctxCats, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels.length ? labels : ['Sem dados'],
+                        datasets: [{
+                            data: data.length ? data : [1],
+                            backgroundColor: ['#7c3aed', '#10b981', '#f59e0b', '#3b82f6', '#8b5cf6', '#ef4444', '#64748b'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'right', labels: { color: textColor, font: { size: 12 } } } }
+                    }
+                });
+            }
+
+            // 3. Reports Category Pie Chart
+            const ctxRepPie = document.getElementById('chart-rep-pie');
+            if (ctxRepPie) {
+                const repCatMap = {};
+                txFiltradas.filter(t => t.tipo === 'despesa').forEach(t => {
+                    const cat = t.cat || 'Geral';
+                    repCatMap[cat] = (repCatMap[cat] || 0) + (t.val || 0);
+                });
+                const repLabels = Object.keys(repCatMap);
+                const repData = Object.values(repCatMap);
+
+                if (chartRepPieInstance) chartRepPieInstance.destroy();
+                chartRepPieInstance = new Chart(ctxRepPie, {
+                    type: 'pie',
+                    data: {
+                        labels: repLabels.length ? repLabels : ['Sem Despesas'],
+                        datasets: [{
+                            data: repData.length ? repData : [1],
+                            backgroundColor: ['#7c3aed', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ef4444'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'bottom', labels: { color: textColor } } }
+                    }
+                });
+            }
+        }
+
+        // RENDER MASTER
+        function renderApp() {
+            validarIntegridadeDB();
+            applyTheme();
+            checkAuth();
+
+            // Contas & Cartões
+            const accSelect = document.getElementById('tx-conta');
+            if (accSelect) {
+                accSelect.innerHTML = '';
+                db.contas.forEach(c => accSelect.innerHTML += `<option value="conta_${c.id}">🏦 ${c.nome}</option>`);
+                db.cartoes.forEach(c => accSelect.innerHTML += `<option value="cartao_${c.id}">💳 ${c.nome}</option>`);
+            }
+
+            // Categorias
+            const catSelect = document.getElementById('tx-cat');
+            const limCatSelect = document.getElementById('lim-cat');
+            if(catSelect) {
+                catSelect.innerHTML = '';
+                db.categorias.forEach(c => catSelect.innerHTML += `<option value="${c.nome}">${c.nome}</option>`);
+            }
+            if(limCatSelect) {
+                limCatSelect.innerHTML = '';
+                db.categorias.filter(c => c.tipo === 'despesa').forEach(c => limCatSelect.innerHTML += `<option value="${c.nome}">${c.nome}</option>`);
+            }
+
+            // Filtros de Relatórios
+            const repCatSelect = document.getElementById('rep-filter-cat');
+            if(repCatSelect) {
+                const currentCat = repCatSelect.value;
+                repCatSelect.innerHTML = '<option value="">Todas as Categorias</option>';
+                db.categorias.forEach(c => {
+                    const sel = c.nome === currentCat ? 'selected' : '';
+                    repCatSelect.innerHTML += `<option value="${c.nome}" ${sel}>${c.nome}</option>`;
+                });
+            }
+
+            const repYearSelect = document.getElementById('rep-filter-year');
+            if(repYearSelect) {
+                const currentYear = repYearSelect.value;
+                const yearsSet = new Set(['2024', '2025', '2026', '2027']);
+                db.transacoes.forEach(t => { if (t.date && t.date.includes('-')) yearsSet.add(t.date.split('-')[0]); });
+                const sortedYears = Array.from(yearsSet).sort();
+                repYearSelect.innerHTML = '<option value="">Todos os Anos</option>';
+                sortedYears.forEach(y => {
+                    const sel = y === currentYear ? 'selected' : '';
+                    repYearSelect.innerHTML += `<option value="${y}" ${sel}>${y}</option>`;
+                });
+            }
+
+            // Destino Importação
+            const importDestino = document.getElementById('import-destino');
+            if(importDestino) {
+                const valorAtual = importDestino.value;
+                importDestino.innerHTML = '<option value="">-- Escolha a Conta ou Cartão --</option>';
+                db.contas.forEach(c => importDestino.innerHTML += `<option value="conta_${c.id}">🏦 ${c.nome}</option>`);
+                db.cartoes.forEach(c => importDestino.innerHTML += `<option value="cartao_${c.id}">💳 ${c.nome}</option>`);
+                importDestino.value = valorAtual;
+            }
+
+            // Totais
+            const totalReceitas = db.transacoes.filter(t => t.tipo === 'receita').reduce((a, b) => a + (b.val || 0), 0);
+            const totalDespesas = db.transacoes.filter(t => t.tipo === 'despesa').reduce((a, b) => a + (b.val || 0), 0);
+            const saldoContas = db.contas.reduce((a, b) => a + (b.saldo || 0), 0);
+            const resultado = totalReceitas - totalDespesas;
+
+            document.getElementById('dash-saldo').innerText = `R$ ${saldoContas.toFixed(2)}`;
+            document.getElementById('dash-receitas').innerText = `R$ ${totalReceitas.toFixed(2)}`;
+            document.getElementById('dash-despesas').innerText = `R$ ${totalDespesas.toFixed(2)}`;
+            
+            const resEl = document.getElementById('dash-resultado');
+            resEl.innerText = `R$ ${resultado.toFixed(2)}`;
+            resEl.className = resultado >= 0 ? 'val-plus' : 'val-minus';
+
+            // Pendentes
+            const tbPend = document.getElementById('tb-pendentes');
+            if (tbPend) {
+                tbPend.innerHTML = '';
+                db.transacoes.filter(t => t.status === 'pendente').forEach(t => {
+                    tbPend.innerHTML += `<tr><td>${t.date}</td><td>${t.desc}</td><td>${t.tipo}</td><td class="${t.tipo==='receita'?'val-plus':'val-minus'}">R$ ${(t.val||0).toFixed(2)}</td></tr>`;
+                });
+            }
+
+            // Indicadores
+            const indBox = document.getElementById('dash-indicadores');
+            if (indBox) {
+                const atvTotal = db.patrimonio.filter(p => p.tipo === 'ativo').reduce((a,b) => a + (b.val||0), 0);
+                const pasTotal = db.patrimonio.filter(p => p.tipo === 'passivo').reduce((a,b) => a + (b.val||0), 0);
+                indBox.innerHTML = `
+                    <div><small style="color:var(--text-muted); font-weight:700;">PATRIMÔNIO LÍQUIDO</small><h4 style="margin-top:4px; font-weight:800; font-size:1.2rem;">R$ ${(atvTotal - pasTotal).toFixed(2)}</h4></div>
+                    <div><small style="color:var(--text-muted); font-weight:700;">TAXA DE POUPANÇA</small><h4 style="margin-top:4px; font-weight:800; font-size:1.2rem;">${totalReceitas > 0 ? Math.round((resultado/totalReceitas)*100) : 0}%</h4></div>
+                `;
+            }
+
+            // Tabela Transações
+            const tbTx = document.getElementById('tb-tx');
+            if (tbTx) {
+                const search = (document.getElementById('tx-search')?.value || '').toLowerCase();
+                tbTx.innerHTML = '';
+                db.transacoes.filter(t => (t.desc || '').toLowerCase().includes(search) || (t.cat || '').toLowerCase().includes(search)).forEach(t => {
+                    let nomeDestino = '-';
+                    const targetId = String(t.contaId || '');
+                    if(targetId.startsWith('conta_')) {
+                        const acc = db.contas.find(c => c.id === parseInt(targetId.replace('conta_', '')));
+                        if(acc) nomeDestino = `🏦 ${acc.nome}`;
+                    } else if(targetId.startsWith('cartao_')) {
+                        const card = db.cartoes.find(c => c.id === parseInt(targetId.replace('cartao_', '')));
+                        if(card) nomeDestino = `💳 ${card.nome}`;
+                    }
+
+                    tbTx.innerHTML += `
+                        <tr>
+                            <td>${t.date}</td>
+                            <td><strong>${t.desc}</strong></td>
+                            <td>${t.cat || 'Geral'} ${t.tag ? `<span class="badge">${t.tag}</span>` : ''}</td>
+                            <td>${nomeDestino}</td>
+                            <td><span class="badge">${t.status}</span></td>
+                            <td class="${t.tipo==='receita'?'val-plus':'val-minus'}">R$ ${(t.val||0).toFixed(2)}</td>
+                            <td>
+                                <button class="btn-amber btn-sm" onclick="editTx(${t.id})">✏️</button>
+                                <button class="btn-red btn-sm" onclick="deleteTx(${t.id})">🗑️</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+
+            // Contas
+            const tbAcc = document.getElementById('tb-contas');
+            if (tbAcc) {
+                tbAcc.innerHTML = '';
+                db.contas.forEach(c => {
+                    tbAcc.innerHTML += `<tr><td><strong>${c.nome}</strong></td><td class="val-plus">R$ ${(c.saldo||0).toFixed(2)}</td><td><button class="btn-red btn-sm" onclick="deleteConta(${c.id})">🗑️</button></td></tr>`;
+                });
+            }
+
+            // Cartões
+            const tbCard = document.getElementById('tb-cartoes');
+            if (tbCard) {
+                tbCard.innerHTML = '';
+                db.cartoes.forEach(c => {
+                    tbCard.innerHTML += `<tr><td><strong>${c.nome}</strong></td><td>R$ ${(c.limite||0).toFixed(2)}</td><td><button class="btn-red btn-sm" onclick="deleteCartao(${c.id})">🗑️</button></td></tr>`;
+                });
+            }
+
+            // Categorias
+            const tbCat = document.getElementById('tb-categorias');
+            if(tbCat) {
+                tbCat.innerHTML = '';
+                db.categorias.forEach(c => {
+                    tbCat.innerHTML += `<tr><td><strong>${c.nome}</strong></td><td><span class="${c.tipo==='receita'?'val-plus':'val-minus'}">${(c.tipo||'despesa').toUpperCase()}</span></td><td><button class="btn-red btn-sm" onclick="deleteCategoria(${c.id})">🗑️</button></td></tr>`;
+                });
+            }
+
+            // Orçamentos
+            const limBox = document.getElementById('limites-list');
+            if (limBox) {
+                limBox.innerHTML = '';
+                db.limites.forEach(l => {
+                    const spent = db.transacoes.filter(t => t.tipo==='despesa' && (t.cat||'').toLowerCase()===(l.cat||'').toLowerCase()).reduce((a,b)=>a+(b.val||0),0);
+                    const perc = l.val > 0 ? Math.min(Math.round((spent/l.val)*100), 100) : 0;
+                    limBox.innerHTML += `
+                        <div>
+                            <div style="display:flex; justify-content:space-between; font-size:0.8rem; font-weight:600;">
+                                <span>${l.cat}</span><span>R$ ${spent.toFixed(2)} de R$ ${(l.val||0).toFixed(2)} (${perc}%)</span>
+                            </div>
+                            <div style="background:var(--bg-input); height:8px; border-radius:4px; margin-top:6px; overflow:hidden;">
+                                <div style="background:${perc>80?'var(--accent-red)':'var(--primary)'}; width:${perc}%; height:100%; border-radius:4px;"></div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            // Metas
+            const metaBox = document.getElementById('metas-list');
+            if (metaBox) {
+                metaBox.innerHTML = '';
+                db.metas.forEach(m => {
+                    const perc = m.target > 0 ? Math.min(Math.round(((m.current||0)/(m.target||1))*100), 100) : 0;
+                    metaBox.innerHTML += `
+                        <div>
+                            <div style="display:flex; justify-content:space-between; font-size:0.8rem; font-weight:600;">
+                                <span>${m.desc}</span><span>R$ ${(m.current||0).toFixed(2)} / R$ ${(m.target||0).toFixed(2)} (${perc}%)</span>
+                            </div>
+                            <div style="background:var(--bg-input); height:8px; border-radius:4px; margin-top:6px; overflow:hidden;">
+                                <div style="background:var(--accent-green); width:${perc}%; height:100%; border-radius:4px;"></div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            // Patrimônio
+            const tbAst = document.getElementById('tb-ativos');
+            if (tbAst) {
+                tbAst.innerHTML = '';
+                db.patrimonio.filter(p => p.tipo === 'ativo').forEach(p => {
+                    tbAst.innerHTML += `<tr><td>${p.nome}</td><td class="val-plus">R$ ${(p.val||0).toFixed(2)}</td><td><button class="btn-red btn-sm" onclick="deletePatrimonio(${p.id})">🗑️</button></td></tr>`;
+                });
+            }
+
+            const tbPas = document.getElementById('tb-passivos');
+            if (tbPas) {
+                tbPas.innerHTML = '';
+                db.patrimonio.filter(p => p.tipo === 'passivo').forEach(p => {
+                    tbPas.innerHTML += `<tr><td>${p.nome}</td><td class="val-minus">R$ ${(p.val||0).toFixed(2)}</td><td><button class="btn-red btn-sm" onclick="deletePatrimonio(${p.id})">🗑️</button></td></tr>`;
+                });
+            }
+
+            // Relatórios
+            const filterMonth = document.getElementById('rep-filter-month')?.value || '';
+            const filterYear = document.getElementById('rep-filter-year')?.value || '';
+            const filterCat = document.getElementById('rep-filter-cat')?.value || '';
+
+            const txFiltradas = db.transacoes.filter(t => {
+                if(!t.date) return false;
+                const parts = t.date.split('-');
+                if(filterYear && parts[0] !== filterYear) return false;
+                if(filterMonth && parts[1] !== filterMonth) return false;
+                if(filterCat && (t.cat || 'Geral').toLowerCase() !== filterCat.toLowerCase()) return false;
+                return true;
+            });
+
+            const repRec = txFiltradas.filter(t => t.tipo === 'receita').reduce((a, b) => a + (b.val || 0), 0);
+            const repDesp = txFiltradas.filter(t => t.tipo === 'despesa').reduce((a, b) => a + (b.val || 0), 0);
+            const repBal = repRec - repDesp;
+
+            if (document.getElementById('rep-total-rec')) document.getElementById('rep-total-rec').innerText = `R$ ${repRec.toFixed(2)}`;
+            if (document.getElementById('rep-total-desp')) document.getElementById('rep-total-desp').innerText = `R$ ${repDesp.toFixed(2)}`;
+            if (document.getElementById('rep-total-bal')) {
+                const balEl = document.getElementById('rep-total-bal');
+                balEl.innerText = `R$ ${repBal.toFixed(2)}`;
+                balEl.className = repBal >= 0 ? 'val-plus' : 'val-minus';
+            }
+            if (document.getElementById('rep-total-count')) document.getElementById('rep-total-count').innerText = txFiltradas.length;
+
+            const tbRepCat = document.getElementById('tb-rep-cat');
+            if (tbRepCat) {
+                tbRepCat.innerHTML = '';
+                const catMap = {};
+                const despesasFiltradas = txFiltradas.filter(t => t.tipo === 'despesa');
+                const totalDespesasFiltrado = despesasFiltradas.reduce((a, b) => a + (b.val || 0), 0);
+
+                despesasFiltradas.forEach(t => {
+                    const category = t.cat || 'Geral';
+                    catMap[category] = (catMap[category] || 0) + (t.val || 0);
+                });
+
+                const catKeys = Object.keys(catMap);
+                if (catKeys.length === 0) {
+                    tbRepCat.innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--text-muted)">Sem registros.</td></tr>';
+                } else {
+                    catKeys.forEach(cat => {
+                        const val = catMap[cat];
+                        const pct = totalDespesasFiltrado > 0 ? ((val / totalDespesasFiltrado) * 100).toFixed(1) : 0;
+                        tbRepCat.innerHTML += `<tr><td><strong>${cat}</strong></td><td>R$ ${val.toFixed(2)}</td><td>${pct}%</td></tr>`;
+                    });
+                }
+            }
+
+            const tbRepTx = document.getElementById('tb-rep-tx');
+            if (tbRepTx) {
+                tbRepTx.innerHTML = '';
+                if (txFiltradas.length === 0) {
+                    tbRepTx.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-muted)">Nenhum registro encontrado.</td></tr>';
+                } else {
+                    txFiltradas.forEach(t => {
+                        tbRepTx.innerHTML += `
+                            <tr>
+                                <td>${t.date}</td>
+                                <td><strong>${t.desc}</strong></td>
+                                <td>${t.cat || 'Geral'}</td>
+                                <td><span class="badge">${t.tipo}</span></td>
+                                <td class="${t.tipo==='receita'?'val-plus':'val-minus'}">R$ ${(t.val||0).toFixed(2)}</td>
+                            </tr>
+                        `;
+                    });
+                }
+            }
+
+            // Alertas
+            const alertBox = document.getElementById('sys-alerts');
+            if (alertBox) {
+                alertBox.innerHTML = '';
+                if(totalDespesas > totalReceitas && totalReceitas > 0) {
+                    alertBox.innerHTML += `<div class="badge badge-danger" style="display:block; padding:12px;">🚨 <strong>Atenção:</strong> Suas despesas ultrapassaram as receitas este mês.</div>`;
+                }
+                db.limites.forEach(l => {
+                    const spent = db.transacoes.filter(t => t.tipo==='despesa' && (t.cat||'').toLowerCase()===(l.cat||'').toLowerCase()).reduce((a,b)=>a+(b.val||0),0);
+                    if(spent > l.val) {
+                        alertBox.innerHTML += `<div class="badge badge-warning" style="display:block; padding:12px;">⚠️ Teto orçamentário estourado em <strong>${l.cat}</strong>.</div>`;
+                    }
+                });
+                if(!alertBox.innerHTML) alertBox.innerHTML = `<span style="color:var(--text-muted); font-size:0.85rem;">Sua saúde financeira está sob controle.</span>`;
+            }
+
+            // Renderizar gráficos
+            renderCharts(totalReceitas, totalDespesas, txFiltradas);
+        }
+
+        function renderTxTable() { renderApp(); }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const dateInput = document.getElementById('tx-date');
+            if(dateInput) dateInput.value = new Date().toISOString().split('T')[0];
+
+            const dropZone = document.getElementById('drop-zone');
+            if (dropZone) {
+                dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.style.borderColor = 'var(--primary)'; });
+                dropZone.addEventListener('dragleave', (e) => { e.preventDefault(); dropZone.style.borderColor = 'var(--border)'; });
+                dropZone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    dropZone.style.borderColor = 'var(--border)';
+                    if(!document.getElementById('import-destino').value) {
+                        alert('Selecione a Conta ou Cartão de destino!');
+                        return;
+                    }
+                    if (e.dataTransfer.files.length > 0) {
+                        const reader = new FileReader();
+                        reader.onload = function(evt) { analisarEConciliar(evt.target.result); };
+                        reader.readAsText(e.dataTransfer.files[0]);
+                    }
+                });
+            }
+
+            renderApp();
+        });
+    </script>
+    <script src="app.js"></script>
+</body>
+</html>
