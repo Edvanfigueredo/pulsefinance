@@ -19,7 +19,29 @@ Esta evolução preserva as funcionalidades existentes (transações, contas, ca
 
 ## Organização do código
 
-Os recursos novos estão separados por responsabilidade: `src/services` contém persistência e preferências, `src/features` contém regras de negócio como o relatório, `src/ui` contém componentes de interface e `src/styles` concentra os estilos complementares. O HTML legado foi preservado para evitar regressões graduais.
+O `index.html` agora é exclusivamente a casca semântica da aplicação: dependências externas, estrutura visual e referências aos módulos. Estilos e regras foram extraídos sem alterar IDs, classes, eventos ou formatos de dados já usados pela interface.
+
+```text
+src/
+├── core/
+│   └── state.js                 # estado, persistência, autenticação e navegação
+├── features/
+│   ├── transactions.js          # transações, contas, cartões, categorias e patrimônio
+│   ├── data-transfer.js         # importação, conciliação e assistente educativo
+│   └── month-report.js          # emissão do relatório mensal
+├── services/
+│   ├── export-service.js        # exportação JSON e CSV
+│   └── preferences-service.js   # preferências visuais persistidas
+├── styles/
+│   ├── base.css                 # tokens, layout e componentes principais
+│   └── enhancements.css         # estilos dos recursos complementares
+├── ui/
+│   ├── dashboard.js             # gráficos e renderização das telas
+│   └── accessibility-settings.js
+└── main.js                      # inicialização única e eventos de infraestrutura
+```
+
+Os scripts continuam clássicos (sem etapa de build), carregados em ordem explícita no final da página. Isso mantém compatibilidade com GitHub Pages e com os `onclick` existentes, enquanto deixa cada domínio em seu próprio arquivo para manutenção futura.
 
 ## Acessibilidade e relatório
 
